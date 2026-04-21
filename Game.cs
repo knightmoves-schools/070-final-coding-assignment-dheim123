@@ -1,79 +1,67 @@
 class Game
 {
-    private string _phrase;
-    private const string MagicWord = "PLAY";
+    private string phrase;
 
-    public Game(string phrase)
+    public Game(string inputPhrase)
     {
         // Store the phrase in uppercase so comparisons are easier later
-        _phrase = phrase.ToUpper();
+        phrase = inputPhrase.ToUpper();
     }
 
     public string DisplayBlanks()
     {
-        // Split the phrase into individual words
-        string[] words = _phrase.Split(' ');
-
-        // Build the result word by word
+        // This will hold the result we build and return
         string result = "";
-        for (int w = 0; w < words.Length; w++)
-        {
-            // Add a double space between words
-            if (w > 0)
-                result += "  ";
 
-            // Replace each letter in the word with an underscore
-            for (int i = 0; i < words[w].Length; i++)
+        // Go through each letter in the phrase one at a time
+        foreach (char letter in phrase)
+        {
+            // If the character is a space, keep spacing between words
+            if (letter == ' ')
             {
-                if (i > 0)
-                    result += " "; // single space between letters
-                result += "_";
+                result += "  "; // double space between words
+            }
+            else
+            {
+                // Otherwise, show an underscore for each hidden letter
+                result += "_ ";
             }
         }
 
+        // Return the finished blank version of the phrase
         return result;
     }
 
     public string Play(char[] guessedLetters)
     {
-        // Convert guessed letters to uppercase for easy comparison
-        string guessedStr = new string(guessedLetters).ToUpper();
+        // Convert the char array into a string and make it uppercase
+        // This makes it easier to compare letters later
+        string guesses = new string(guessedLetters).ToUpper();
 
-        // Check if easter egg cheat is active (magic word "PLAY" is in the guess)
-        bool easterEggActive = ApplyEasterEggCheat(guessedStr);
-
-        // Check if the time cheat is active (current second is divisible by 2)
-        bool timeCheatActive = ApplyTimeCheat(DateTime.Now, 2);
-
-        // Split the phrase into words so we can handle word-by-word revealing
-        string[] words = _phrase.Split(' ');
-
+        // This will hold the result we build and return
         string result = "";
-        for (int w = 0; w < words.Length; w++)
+
+        // Go through each letter in the phrase
+        foreach (char letter in phrase)
         {
-            // Add a double space between words
-            if (w > 0)
-                result += "  ";
-
-            // Time cheat reveals every other word starting at the 2nd word (index 1, 3, 5...)
-            bool revealWholeWord = easterEggActive || (timeCheatActive && w % 2 == 1);
-
-            // Build each letter in the word
-            for (int i = 0; i < words[w].Length; i++)
+            // If it's a space, keep it
+            if (letter == ' ')
             {
-                if (i > 0)
-                    result += " "; // single space between letters
-
-                char letter = words[w][i];
-
-                // Show the letter if the whole word is revealed OR the letter was guessed
-                if (revealWholeWord || guessedStr.Contains(letter))
-                    result += letter;
-                else
-                    result += "_";
+                result += "  ";
+            }
+            // If the guessed letters contain this letter, reveal it
+            else if (guesses.Contains(letter))
+            {
+                result += letter + " ";
+            }
+            else
+            {
+                // Otherwise, keep it hidden
+                result += "_ ";
             }
         }
 
+        // Return the updated phrase showing guessed letters
         return result;
     }
 
@@ -81,24 +69,17 @@ class Game
     {
         // Must be exactly 10 characters
         if (guessedLetters.Length != 10)
+        {
             return false;
+        }
 
         // Must not contain any spaces
-        if (guessedLetters.Contains(' '))
+        if (guessedLetters.Contains(" "))
+        {
             return false;
+        }
 
+        // If both checks pass, the input is valid
         return true;
-    }
-
-    public bool ApplyTimeCheat(DateTime now, int divisibleByValue)
-    {
-        // Returns true if the current second is evenly divisible by divisibleByValue
-        return now.Second % divisibleByValue == 0;
-    }
-
-    public bool ApplyEasterEggCheat(string guessedLetters)
-    {
-        // Returns true if the secret magic word "PLAY" is found in the guessed letters
-        return guessedLetters.ToUpper().Contains(MagicWord);
     }
 }
